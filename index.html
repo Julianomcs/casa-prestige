@@ -47,8 +47,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Preload LCP image — máxima prioridade -->
-    <link rel="preload" as="image" href="imagens/hero-innovare.webp" fetchpriority="high" />
+    <!-- Preload LCP image — máxima prioridade, responsivo -->
+    <link rel="preload" as="image"
+          href="imagens/hero-innovare-mobile.avif"
+          fetchpriority="high"
+          media="(max-width: 768px)" />
+    <link rel="preload" as="image"
+          href="imagens/hero-innovare.avif"
+          fetchpriority="high"
+          media="(min-width: 769px)" />
 
     <!-- Fonts — non-blocking com font-display:swap -->
     <link
