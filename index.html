@@ -1,12 +1,27 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-M7395857');</script>
+    <!-- Google Tag Manager — Lazy load (após interação ou 3.5s) -->
+    <script>
+    (function(w,d,s,l,i){
+      w[l]=w[l]||[];
+      var loaded=false;
+      function loadGTM(){
+        if(loaded) return; loaded=true;
+        w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+        var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),
+            dl=l!='dataLayer'?'&l='+l:'';
+        j.async=true;
+        j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+        f.parentNode.insertBefore(j,f);
+      }
+      var events=['scroll','mousemove','touchstart','keydown','click'];
+      function trigger(){events.forEach(function(e){w.removeEventListener(e,trigger,{passive:true});});loadGTM();}
+      events.forEach(function(e){w.addEventListener(e,trigger,{passive:true,once:true});});
+      setTimeout(loadGTM,3500);
+    })(window,document,'script','dataLayer','GTM-M7395857');
+    </script>
     <!-- End Google Tag Manager -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -60,8 +75,8 @@
         --color-cinza-suave:    oklch(0.96 0.01 80);
         --color-cinza-carvao:   oklch(0.25 0.01 0);
         --color-carvao-muted:   oklch(0.45 0.01 0);
-        --color-ouro-escuro:    oklch(0.60 0.12 65);
-        --color-ouro-hover:     oklch(0.50 0.12 65);
+        --color-ouro-escuro:    oklch(0.50 0.13 65);
+        --color-ouro-hover:     oklch(0.42 0.13 65);
         --color-rose-gold:      oklch(0.82 0.06 60);
         --shadow-galeria:       0 4px 20px rgba(166, 123, 72, 0.15);
         --font-editorial: 'Playfair Display', Georgia, serif;
@@ -81,23 +96,6 @@
         color: oklch(0.25 0.01 0);
         font-family: 'Montserrat', system-ui, sans-serif;
         -webkit-font-smoothing: antialiased;
-        background-image:
-          linear-gradient(to right, rgba(229,192,161,0.10) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(229,192,161,0.10) 1px, transparent 1px);
-        background-size: 120px 120px;
-        position: relative;
-      }
-
-      /* Intersection markers Rose Gold — pseudo-element fixo */
-      body::before {
-        content: '';
-        position: fixed;
-        inset: 0;
-        background-image: radial-gradient(circle at 120px 120px, #A67B48 1.5px, transparent 1.5px);
-        background-size: 120px 120px;
-        opacity: 0.35;
-        pointer-events: none;
-        z-index: 0;
       }
 
       h1, h2, h3, h4, h5, h6 {
@@ -126,7 +124,7 @@
         align-items: center;
         justify-content: center;
         gap: 10px;
-        background-color: oklch(0.60 0.12 65);
+        background-color: oklch(0.50 0.13 65);
         color: oklch(0.99 0.01 80);
         font-family: 'Montserrat', system-ui, sans-serif;
         font-size: 15px;
@@ -148,7 +146,7 @@
         white-space: nowrap;
       }
       .btn-primary:hover {
-        background-color: oklch(0.50 0.12 65);
+        background-color: oklch(0.42 0.13 65);
         transform: translateY(-2px);
         box-shadow: 0 8px 28px rgba(135,96,52,0.28);
       }
@@ -262,12 +260,6 @@
         object-fit: cover;
         object-position: center;
         filter: sepia(10%) contrast(105%) saturate(110%);
-        transform: scale(1);
-        transition: transform 14s cubic-bezier(0.25,0.46,0.45,0.94);
-      }
-
-      .hero-image-wrapper:hover .hero-img {
-        transform: scale(1.07);
       }
 
       .hero-content {
@@ -468,13 +460,12 @@
         height: 100%;
         object-fit: cover;
         filter: sepia(10%) contrast(105%) saturate(110%);
-        transition: filter 0.8s ease, transform 10s ease-out;
+        transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
         border-radius: 4px;
       }
 
       .gallery-card:hover .gallery-img {
         transform: scale(1.04);
-        filter: sepia(8%) contrast(107%) saturate(112%);
       }
 
       /* ════════════════════════════════════════
@@ -1331,18 +1322,21 @@
       /* 1. Reduced Motion */
       var motionOK = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      /* 2. NAV — scroll shadow */
+      /* 2. NAV — scroll shadow via IntersectionObserver (zero reflow) */
       var nav = document.getElementById('nav-header');
+      if (nav) {
+        var sentinel = document.createElement('div');
+        sentinel.setAttribute('aria-hidden', 'true');
+        sentinel.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:24px;pointer-events:none;';
+        document.body.insertBefore(sentinel, document.body.firstChild);
 
-      function updateNav() {
-        if (!nav) return;
-        var scrolled = window.scrollY > 24;
-        nav.style.boxShadow         = scrolled ? '0 2px 28px rgba(166,123,72,0.10)' : 'none';
-        nav.style.borderBottomColor = scrolled ? 'rgba(229,192,161,0.50)' : 'rgba(229,192,161,0.25)';
+        var navIO = new IntersectionObserver(function (entries) {
+          var scrolled = !entries[0].isIntersecting;
+          nav.style.boxShadow         = scrolled ? '0 2px 28px rgba(166,123,72,0.10)' : 'none';
+          nav.style.borderBottomColor = scrolled ? 'rgba(229,192,161,0.50)' : 'rgba(229,192,161,0.25)';
+        }, { threshold: 0 });
+        navIO.observe(sentinel);
       }
-
-      window.addEventListener('scroll', updateNav, { passive: true });
-      updateNav();
 
       /* 3. KEN BURNS */
       var heroImg = document.querySelector('.hero-img');
