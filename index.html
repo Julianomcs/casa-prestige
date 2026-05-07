@@ -922,6 +922,27 @@
       }
     </style>
 
+    <!-- Meta Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s){
+        if(f.fbq)return;
+        n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
+        t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)
+      }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init','1788274741742291');
+      fbq('track','PageView');
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+           src="https://www.facebook.com/tr?id=1788274741742291&ev=PageView&noscript=1"
+           alt="" />
+    </noscript>
+    <!-- End Meta Pixel Code -->
+
   </head>
 
   <body>
@@ -1252,6 +1273,8 @@
                   aria-label="Adquirir Air Fryer Innovare 110V"
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-pixel="ClickToSite"
+                  data-pixel-variant="110V"
                 >
                   QUERO 110v
                 </a>
@@ -1275,6 +1298,8 @@
                   aria-label="Adquirir Air Fryer Innovare 220V"
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-pixel="ClickToSite"
+                  data-pixel-variant="220V"
                 >
                   QUERO 220v
                 </a>
@@ -1422,6 +1447,74 @@
 
     }());
     </script>
+
+    <!-- Meta Pixel: ClickToSite Event Tracking -->
+    <script>
+    (function () {
+      'use strict';
+
+      /**
+       * Dispara um evento personalizado 'ClickToSite' quando o usuário
+       * clica em qualquer link com [data-pixel="ClickToSite"].
+       *
+       * Estratégia anti-race-condition:
+       *  - target="_blank": a aba atual permanece viva → fbq dispara naturalmente.
+       *    Não é necessário interromper a navegação.
+       *  - mesma aba (fallback): preventDefault + setTimeout(80ms) para dar tempo
+       *    do beacon /tr/ ser enviado antes de navegar. 80ms é imperceptível
+       *    ao usuário e suficiente para o fbevents enfileirar a request.
+       *  - eventID: gerado por clique para permitir deduplicação caso o mesmo
+       *    evento seja enviado também pela Conversions API (server-side).
+       */
+      function uuid() {
+        if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+          var r = Math.random() * 16 | 0;
+          var v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      }
+
+      function fireClickToSite(el) {
+        if (typeof window.fbq !== 'function') return;
+
+        var eventID = uuid();
+        var variant = el.getAttribute('data-pixel-variant') || '';
+        var label   = el.getAttribute('aria-label') || el.textContent.trim();
+
+        window.fbq('trackCustom', 'ClickToSite', {
+          content_name:     label,
+          content_category: 'checkout_redirect',
+          variant:          variant,
+          destination_url:  el.href
+        }, { eventID: eventID });
+      }
+
+      document.addEventListener('click', function (e) {
+        var el = e.target.closest('[data-pixel="ClickToSite"]');
+        if (!el) return;
+
+        var opensNewTab = el.target === '_blank' ||
+                          e.metaKey || e.ctrlKey || e.shiftKey ||
+                          e.button === 1;
+
+        if (opensNewTab) {
+          /* Aba atual permanece — apenas dispara, sem bloquear navegação. */
+          fireClickToSite(el);
+          return;
+        }
+
+        /* Fallback defensivo: clique na mesma aba.
+           Adia a navegação por 80ms para o pixel terminar. */
+        if (e.defaultPrevented) return;
+        e.preventDefault();
+        fireClickToSite(el);
+        var href = el.href;
+        setTimeout(function () { window.location.href = href; }, 80);
+      }, { capture: true });
+    })();
+    </script>
+    <!-- End Meta Pixel: ClickToSite -->
 
   </body>
 </html>
